@@ -13,6 +13,8 @@ function App() {
   const [contract, setContract] = useState(null);
   const [isLoading, setisLoading] = useState(false)
   const [selectedMove, setselectedMove] = useState(null)
+  const [wei, setwei] = useState('');
+  const [p2Address, setp2Address] = useState('')
 
   useEffect(() => {
     const initializeProvider = async () => {
@@ -54,6 +56,17 @@ function App() {
     getNetwork();
   }, [provider]);
 
+  const isValidGame = () => {
+    if(p2Address !== null && p2Address.length === 42 && p2Address.startsWith('0x') && selectedMove !== null && wei !== '0' && wei !== null){
+      return true;
+    }
+    return false;
+  }
+
+  if(isLoading){
+    return <span className="loading loading-ring loading-lg"></span>
+  }
+
   return (
     <div>
       <div className="navbar bg-base-200">
@@ -71,20 +84,32 @@ function App() {
 </div>
 <div className='w-full flex justify-center my-4'>
 <label className="input input-bordered flex items-center w-72">
-  <input type="number" className="grow" placeholder="Enter Amount" />
+  <input type="number" value={wei} onChange={(e) => setwei(e.target.value)} className="grow" placeholder="Enter Amount" />
   <kbd className="kbd kbd-sm">wei</kbd>
 </label>
 </div>
 <div className='w-full flex justify-center my-4'>
 <label className="input input-bordered flex items-center w-72">
-  <input type="text" className="grow" placeholder="Player 2 Address" />
+  <input type="text" value={p2Address} onChange={(e) => setp2Address(e.target.value)} className="grow" placeholder="Player 2 Address" />
   {/* <kbd className="kbd kbd-sm">addr</kbd> */}
+  <div className="label">
+    {p2Address !== null && p2Address.length !== 42 && p2Address !== '' ? <span className="label-text-alt text-red-600">Invalid Address</span> : null}
+  </div>
 </label>
 </div>
-<div className='w-full flex justify-center my-4'>
-<label className="btn btn-primary flex items-center w-72">
+<div className='w-full flex justify-center mt-4'>
+<button className={`btn btn-primary flex items-center w-72 `} disabled={`${isValidGame() ? '' : 'disabled'}`}>
   Start Game
-</label>
+</button>
+</div>
+<div className='w-full flex justify-center my-0'>
+<button className={`btn btn-link text-xs flex items-center w-72 `} onClick={() => {
+  setwei('');
+  setselectedMove(null);
+  setp2Address('');
+}}>
+  Reset
+</button>
 </div>
 
 
