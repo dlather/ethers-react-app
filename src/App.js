@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import CreateGame from "./create-game";
 import SolveGame from "./solve";
+import JoinGame from "./join-game";
 import { RPSAbi } from "./contractAbi";
 
 function App() {
   const [provider, setProvider] = useState(null);
   const [network, setNetwork] = useState("");
-  const [isLoading, setisLoading] = useState(false);
   const [contract, setContract] = useState(null);
+  const [tabIndex, settabIndex] = useState(0);
 
   useEffect(() => {
     const initializeProvider = async () => {
@@ -46,11 +47,11 @@ function App() {
     getNetwork();
   }, [provider]);
 
-  if (isLoading) {
-    return (
-      <span className="loading flex loading-ring max-w-lg mx-auto h-screen loading-lg"></span>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <span className="loading flex loading-ring max-w-lg mx-auto h-screen loading-lg"></span>
+  //   );
+  // }
   if (provider === null) {
     return <div className="mx-auto max-w-lg">No Provider Found</div>;
   }
@@ -70,14 +71,30 @@ function App() {
           <div className="font-semibold px-2">{network.toUpperCase()}</div>
         </div>
       </div>
-      {contract === null ? (
-        <CreateGame setisLoading={setisLoading} provider={provider} />
+      <div role="tablist" className="tabs tabs-boxed rounded-none">
+        <button
+          onClick={() => settabIndex(0)}
+          role="tab"
+          className={`tab ${tabIndex === 0 ? "tab-active" : ""}`}
+        >
+          Your Game
+        </button>
+        <button
+          onClick={() => settabIndex(1)}
+          role="tab"
+          className={`tab ${tabIndex === 1 ? "tab-active" : ""}`}
+        >
+          Join Game
+        </button>
+      </div>
+      {tabIndex === 0 ? (
+        contract === null ? (
+          <CreateGame provider={provider} setContract={setContract} />
+        ) : (
+          <SolveGame provider={provider} contract={contract} />
+        )
       ) : (
-        <SolveGame
-          provider={provider}
-          setisLoading={setisLoading}
-          contract={contract}
-        />
+        <JoinGame provider={provider} />
       )}
     </div>
   );
