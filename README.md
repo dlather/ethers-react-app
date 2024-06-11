@@ -251,3 +251,5 @@ saltWorker.postMessage({ operation: 'generateSalt', length: 32 });
 ```
 
 By using web workers for secure storage and manipulation of sensitive data like salt, you can ensure that the data remains isolated from the main application logic, enhancing security and privacy.
+
+Verified Contract: 0x171cF72fF705992b07d928f0b61b0eF04d76B283
