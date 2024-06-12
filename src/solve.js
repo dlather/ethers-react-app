@@ -46,6 +46,7 @@ const SolveGame = ({ provider, contract }) => {
       const contractWithSigner = contract.connect(signer);
       const txn = await contractWithSigner.j2Timeout();
       settxn(txn);
+      await txn.wait();
       localStorage.clear();
     } catch (err) {
       console.error("Error p1TimeOut", err);
@@ -109,7 +110,7 @@ const SolveGame = ({ provider, contract }) => {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contract]);
+  }, [contract, reload]);
 
   if (isLoading) {
     return (

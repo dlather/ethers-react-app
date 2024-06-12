@@ -30,15 +30,19 @@ function App() {
   useEffect(() => {
     const readLocalStorage = async () => {
       const rpsAddress = localStorage.getItem("RPSAddress");
-      console.log(rpsAddress);
-      if (rpsAddress && ethers.utils.isAddress(rpsAddress)) {
+      const p1Address = localStorage.getItem("p1Address");
+      if (
+        rpsAddress &&
+        ethers.utils.isAddress(rpsAddress) &&
+        userAddress === p1Address
+      ) {
         const ctr = new ethers.Contract(rpsAddress, RPSAbi, provider);
         setContract(ctr);
       }
     };
 
     readLocalStorage();
-  }, [provider]);
+  }, [provider, userAddress]);
 
   useEffect(() => {
     const getNetwork = async () => {
@@ -75,7 +79,10 @@ function App() {
           <div className="font-semibold px-2">{network.toUpperCase()}</div>
         </div>
       </div>
-      <div className="text-sm text-gray-500">User Address: {userAddress}</div>
+      <div className="text-sm my-2 flex justify-between text-gray-500">
+        <p>User Address</p>
+        <p className="font-semibold">{userAddress}</p>
+      </div>
       <div role="tablist" className="tabs tabs-boxed rounded-none">
         <button
           onClick={() => settabIndex(0)}
