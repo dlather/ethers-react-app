@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Timer from "./components/timer";
+import { HasherAbi } from "./contractAbi";
+import { deriveKey, decryptSalt, HashContractAddress } from "./utils";
 
 const SolveGame = ({ provider, contract }) => {
   const [c2Move, setc2Move] = useState(null);
@@ -11,6 +13,7 @@ const SolveGame = ({ provider, contract }) => {
   const currTime = (Date.now() / 1000).toFixed();
   const [txn, settxn] = useState(null);
   const [isLoading, setisLoading] = useState(false);
+  const [pwd, setpwd] = useState(null);
 
   const reloadPage = () => {
     setreload(!reload);
@@ -51,17 +54,53 @@ const SolveGame = ({ provider, contract }) => {
     }
   };
 
-  // TODO:
   const settleGame = async () => {
     setisLoading(true);
     try {
-      const signer = provider.getSigner();
-      const contractWithSigner = contract.connect(signer);
-      const txn = await contractWithSigner.j2Timeout();
-      settxn(txn);
-      localStorage.clear();
+      const providersigner = provider.getSigner();
+      const p1Address = await providersigner.getAddress();
+
+      const encryptedSaltData = JSON.parse(
+        localStorage.getItem("encryptedSalt")
+      );
+      const encryptedSalt = new Uint8Array(encryptedSaltData.data);
+      const iv = new Uint8Array(encryptedSaltData.iv);
+      const signature = localStorage.getItem("signature");
+      const saltForKDF = new Uint8Array(
+        JSON.parse(localStorage.getItem("saltForKDF"))
+      );
+      const key = await deriveKey(pwd, saltForKDF);
+      const decryptedSalt = await decryptSalt(encryptedSalt, key, iv);
+      const signer = ethers.utils.verifyMessage(encryptedSalt, signature);
+
+      if (signer === p1Address) {
+        const c1Hash = await contract.c1Hash();
+        let prevMove = 0;
+        for (let i = 1; i <= 5; i++) {
+          const saltHex = ethers.utils.hexlify(decryptedSalt);
+          const saltBigNumber = ethers.BigNumber.from(saltHex);
+          const hasherContract = new ethers.Contract(
+            HashContractAddress,
+            HasherAbi,
+            provider
+          );
+          const hasherMoveHash = await hasherContract.hash(i, saltBigNumber);
+          if (hasherMoveHash === c1Hash) {
+            prevMove = i;
+            break;
+          }
+        }
+
+        const contractWithSigner = contract.connect(providersigner);
+        const txn = await contractWithSigner.solve(prevMove, decryptedSalt, {
+          gasLimit: 300000,
+        });
+        settxn(txn);
+        await txn.wait();
+        localStorage.clear();
+      }
     } catch (err) {
-      console.error("Error p1TimeOut", err);
+      console.error("Error settleGame", err);
     } finally {
       setisLoading(false);
     }
@@ -128,14 +167,30 @@ const SolveGame = ({ provider, contract }) => {
       ) : (
         <div className="justify-center items-center flex flex-col">
           <div className="flex justify-between items-center w-full">
-            <button className="btn btn-primary" onClick={settleGame}>
-              Settle Game
-            </button>
+            <div className=" my-4">
+              <label className="input input-bordered flex items-center w-72">
+                <input
+                  type="text"
+                  value={pwd}
+                  onChange={(e) => setpwd(e.target.value)}
+                  className="grow"
+                  placeholder="Password"
+                />
+                <kbd className="">🔑</kbd>
+              </label>
+            </div>
             <Timer
               deadline={parseInt(lastAction) + parseInt(timeout)}
               reloadPage={reloadPage}
             />
           </div>
+          <button
+            className="btn btn-primary btn-wide mt-4"
+            onClick={settleGame}
+            disabled={`${pwd !== null && pwd !== "" ? "" : "disabled"}`}
+          >
+            Settle Game
+          </button>
         </div>
       )}
     </div>

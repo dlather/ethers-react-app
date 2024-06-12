@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
-import { RPSAbi, RPSByteCode } from "./contractAbi";
-import { generateSalt, moves, deriveKey, encryptSalt } from "./utils";
+import { RPSAbi } from "./contractAbi";
+import { moves } from "./utils";
 
 const JoinGame = ({ provider }) => {
   const [gameAddress, setgameAddress] = useState("");

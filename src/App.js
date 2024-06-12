@@ -10,13 +10,17 @@ function App() {
   const [network, setNetwork] = useState("");
   const [contract, setContract] = useState(null);
   const [tabIndex, settabIndex] = useState(0);
+  const [userAddress, setuserAddress] = useState(null);
 
   useEffect(() => {
     const initializeProvider = async () => {
       if (window.ethereum) {
         await window.ethereum.request({ method: "eth_requestAccounts" });
         const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
         setProvider(provider);
+        const userAddress = await signer.getAddress();
+        setuserAddress(userAddress);
       }
     };
 
@@ -71,6 +75,7 @@ function App() {
           <div className="font-semibold px-2">{network.toUpperCase()}</div>
         </div>
       </div>
+      <div className="text-sm text-gray-500">User Address: {userAddress}</div>
       <div role="tablist" className="tabs tabs-boxed rounded-none">
         <button
           onClick={() => settabIndex(0)}

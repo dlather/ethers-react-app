@@ -1,7 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
-import { RPSAbi, RPSByteCode } from "./contractAbi";
-import { generateSalt, moves, deriveKey, encryptSalt } from "./utils";
+import { RPSAbi, RPSByteCode, HasherAbi } from "./contractAbi";
+import {
+  generateSalt,
+  moves,
+  deriveKey,
+  encryptSalt,
+  HashContractAddress,
+} from "./utils";
 
 const CreateGame = ({ provider, setContract }) => {
   const [selectedMove, setselectedMove] = useState(null);
@@ -45,18 +51,29 @@ const CreateGame = ({ provider, setContract }) => {
         const { iv, encryptedSalt } = await encryptSalt(salt, key);
         const encryptedSaltArray = Array.from(encryptedSalt);
         const signature = await signer.signMessage(encryptedSaltArray);
-        const moveHash = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(
-            ["string", "bytes32"],
-            [parseInt(selectedMove) + 1, ethers.utils.hexlify(salt)]
-          )
+        const saltHex = ethers.utils.hexlify(salt);
+        const saltBigNumber = ethers.BigNumber.from(saltHex);
+        const hasherContract = new ethers.Contract(
+          HashContractAddress,
+          HasherAbi,
+          provider
         );
+        const hasherMoveHash = await hasherContract.hash(
+          parseInt(selectedMove) + 1,
+          saltBigNumber
+        );
+        // const moveHash = ethers.utils.keccak256(
+        //   ethers.utils.defaultAbiCoder.encode(
+        //     ["uint8", "uint256"],
+        //     [parseInt(selectedMove) + 1, saltBigNumber]
+        //   )
+        // );
+        // console.log(`moveHash: ${moveHash}`);
         const factory = new ethers.ContractFactory(RPSAbi, RPSByteCode, signer);
-        const contract = await factory.deploy(moveHash, p2Address, {
+        const contract = await factory.deploy(hasherMoveHash, p2Address, {
           value: ethers.utils.parseUnits(wei.toString(), "wei"),
         });
         const txn = contract.deployTransaction;
-        console.log(txn.hash);
         settxn(txn);
         await contract.deployTransaction.wait();
         //   await deployedContract.deployed();

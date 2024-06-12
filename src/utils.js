@@ -61,26 +61,9 @@ export function setSecureCookie(name, value, mins) {
   document.cookie = `${name}=${value};${expires};path=/;Secure;HttpOnly;SameSite=Strict`;
 }
 
-const { ethers } = require("ethers");
-
-export function hash(move, salt) {
-  // Ensure move is a number and salt is a hex string
-  if (typeof move !== "number") {
-    throw new Error("Move should be a number");
-  }
-  if (typeof salt !== "string" || !salt.startsWith("0x")) {
-    throw new Error("Salt should be a hex string");
-  }
-
-  // Create the hash using ethers.js
-  const hashedValue = ethers.utils.solidityKeccak256(
-    ["uint8", "uint256"],
-    [move, salt]
-  );
-
-  return hashedValue;
-}
-
 export const moves = ["Rock", "Paper", "Scissors", "Spock", "Lizard"];
 export const acc1 = "0xc9C1754fD6bAF34A2Ed52cF5E25585958Ddc34A1";
 export const acc2 = "0x40E72ea745f86aceEDB1cbD368Ab2D8D055724d0";
+export const HashContractAddress = "0x42BD1a89d523788BBA98bC303DB2a73828fAbC82";
+
+// encryptedSaltArray: 237,59,113,188,163,226,184,118,49,172,174,36,190,12,181,84,255,15,117,153,206,211,168,23,239,236,225,132,194,131,214,41,211,240,95,211,42,123,43,179,128,174,240,185,44,113,72,59
