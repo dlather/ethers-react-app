@@ -73,6 +73,7 @@ const JoinGame = ({ provider }) => {
         console.log(err);
       } finally {
         setisLoading(false);
+        reloadPage();
       }
     }
   };
@@ -87,7 +88,9 @@ const JoinGame = ({ provider }) => {
       const contractWithSigner = contract.connect(signer);
       const txn = await contractWithSigner.j1Timeout();
       settxn(txn);
+      await txn.wait();
       localStorage.clear();
+      window.location.reload();
     } catch (err) {
       console.error("Error p1TimeOut", err);
     } finally {

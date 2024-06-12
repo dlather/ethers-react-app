@@ -48,6 +48,7 @@ const SolveGame = ({ provider, contract }) => {
       settxn(txn);
       await txn.wait();
       localStorage.clear();
+      window.location.reload();
     } catch (err) {
       console.error("Error p1TimeOut", err);
     } finally {
@@ -99,6 +100,7 @@ const SolveGame = ({ provider, contract }) => {
         settxn(txn);
         await txn.wait();
         localStorage.clear();
+        window.location.reload();
       }
     } catch (err) {
       console.error("Error settleGame", err);
