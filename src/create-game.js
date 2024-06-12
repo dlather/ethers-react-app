@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
-import { RPSAbi, RPSByteCode, HasherAbi } from "./contractAbi";
+import { RPSAbi, RPSByteCode } from "./contractAbi";
 import {
   generateSalt,
   moves,
   deriveKey,
   encryptSalt,
-  HashContractAddress,
+  //   HashContractAddress,
 } from "./utils";
 
 const CreateGame = ({ provider, setContract }) => {
@@ -51,23 +51,23 @@ const CreateGame = ({ provider, setContract }) => {
         const { iv, encryptedSalt } = await encryptSalt(salt, key);
         const encryptedSaltArray = Array.from(encryptedSalt);
         const signature = await signer.signMessage(encryptedSaltArray);
-        const saltHex = ethers.utils.hexlify(salt);
-        const saltBigNumber = ethers.BigNumber.from(saltHex);
-        const hasherContract = new ethers.Contract(
-          HashContractAddress,
-          HasherAbi,
-          provider
-        );
-        const hasherMoveHash = await hasherContract.hash(
-          parseInt(selectedMove) + 1,
-          saltBigNumber
-        );
-        // const moveHash = ethers.utils.keccak256(
-        //   ethers.utils.defaultAbiCoder.encode(
-        //     ["uint8", "uint256"],
-        //     [parseInt(selectedMove) + 1, saltBigNumber]
-        //   )
+        // const saltHex = ethers.utils.hexlify(salt);
+        // const saltBigNumber = ethers.BigNumber.from(saltHex);
+        // const hasherContract = new ethers.Contract(
+        //   HashContractAddress,
+        //   HasherAbi,
+        //   provider
         // );
+        // const hasherMoveHash = await hasherContract.hash(
+        //   parseInt(selectedMove) + 1,
+        //   saltBigNumber
+        // );
+        const hasherMoveHash = ethers.utils.keccak256(
+          ethers.utils.solidityPack(
+            ["uint8", "uint256"],
+            [parseInt(selectedMove) + 1, ethers.BigNumber.from(salt)]
+          )
+        );
         // console.log(`moveHash: ${moveHash}`);
         const factory = new ethers.ContractFactory(RPSAbi, RPSByteCode, signer);
         const contract = await factory.deploy(hasherMoveHash, p2Address, {

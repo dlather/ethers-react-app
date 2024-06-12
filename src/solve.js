@@ -79,14 +79,20 @@ const SolveGame = ({ provider, contract }) => {
         const c1Hash = await contract.c1Hash();
         let prevMove = 0;
         for (let i = 1; i <= 5; i++) {
-          const saltHex = ethers.utils.hexlify(decryptedSalt);
-          const saltBigNumber = ethers.BigNumber.from(saltHex);
-          const hasherContract = new ethers.Contract(
-            HashContractAddress,
-            HasherAbi,
-            provider
+          //   const saltHex = ethers.utils.hexlify(decryptedSalt);
+          //   const saltBigNumber = ethers.BigNumber.from(saltHex);
+          //   const hasherContract = new ethers.Contract(
+          //     HashContractAddress,
+          //     HasherAbi,
+          //     provider
+          //   );
+          //   const hasherMoveHash = await hasherContract.hash(i, saltBigNumber);
+          const hasherMoveHash = ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["uint8", "uint256"],
+              [i, ethers.BigNumber.from(decryptedSalt)]
+            )
           );
-          const hasherMoveHash = await hasherContract.hash(i, saltBigNumber);
           if (hasherMoveHash === c1Hash) {
             prevMove = i;
             break;
