@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { RPSAbi } from "./contractAbi";
-import { moves } from "./utils";
+import { moves, sanitizeInput } from "./utils";
 import Timer from "./components/timer";
 
 const JoinGame = ({ provider }) => {
@@ -18,6 +18,7 @@ const JoinGame = ({ provider }) => {
   const [j2, setj2] = useState(null);
   const [j1, setj1] = useState(null);
   const currTime = (Date.now() / 1000).toFixed();
+  const [stake, setstake] = useState(null);
 
   useEffect(() => {
     const fetchGameDetails = async () => {
@@ -33,7 +34,9 @@ const JoinGame = ({ provider }) => {
             const timeout = await contract.TIMEOUT();
             const lastAct = await contract.lastAction();
             const p1 = await contract.j1();
+            const stk = await contract.stake();
             setcontract(contract);
+            setstake(ethers.BigNumber.from(stk._hex).toNumber());
             setj2(p2);
             setj1(p1);
             settimeout(ethers.BigNumber.from(timeout._hex).toNumber());
@@ -123,7 +126,11 @@ const JoinGame = ({ provider }) => {
           <input
             type="text"
             value={gameAddress}
-            onChange={(e) => setgameAddress(e.target.value)}
+            onChange={(e) => {
+              if (sanitizeInput(e.target.value)) {
+                setgameAddress(e.target.value);
+              }
+            }}
             className="grow"
             placeholder="Enter Game Address"
           />
@@ -143,9 +150,11 @@ const JoinGame = ({ provider }) => {
             {parseInt(lastAction) + parseInt(timeout) < parseInt(currTime) ? (
               <div className="flex justify-between items-center w-full">
                 <p className="text-lg font-semibold">Player 1 Timed out</p>
-                <button className="btn btn-primary" onClick={p2TimeOut}>
-                  Get Stake Back
-                </button>
+                {stake > 0 && (
+                  <button className="btn btn-primary" onClick={p2TimeOut}>
+                    Get Stake Back
+                  </button>
+                )}
               </div>
             ) : (
               <div className="flex justify-between items-center w-full">
@@ -182,6 +191,9 @@ const JoinGame = ({ provider }) => {
               {/* <button className="btn btn-primary" onClick={p2TimeOut}>
                 Get Stake Back
               </button> */}
+              {parseInt(lastAction) + parseInt(timeout) > currTime ? (
+                <p>{stake} wei</p>
+              ) : null}
               {parseInt(lastAction) + parseInt(timeout) > currTime ? (
                 <Timer
                   deadline={parseInt(lastAction) + parseInt(timeout)}

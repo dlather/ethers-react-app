@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Timer from "./components/timer";
 import { HasherAbi } from "./contractAbi";
-import { deriveKey, decryptSalt, HashContractAddress } from "./utils";
+import {
+  deriveKey,
+  decryptSalt,
+  HashContractAddress,
+  sanitizeInput,
+} from "./utils";
 
 const SolveGame = ({ provider, contract }) => {
   const [c2Move, setc2Move] = useState(null);
@@ -14,6 +19,7 @@ const SolveGame = ({ provider, contract }) => {
   const [txn, settxn] = useState(null);
   const [isLoading, setisLoading] = useState(false);
   const [pwd, setpwd] = useState(null);
+  const [stake, setstake] = useState(null);
 
   const reloadPage = () => {
     setreload(!reload);
@@ -25,6 +31,8 @@ const SolveGame = ({ provider, contract }) => {
       try {
         const c2 = await contract.c2();
         setc2Move(c2);
+        const stk = await contract.stake();
+        setstake(ethers.BigNumber.from(stk._hex).toNumber());
         const timeout = await contract.TIMEOUT();
         settimeout(ethers.BigNumber.from(timeout._hex).toNumber());
         const lastAct = await contract.lastAction();
@@ -166,11 +174,22 @@ const SolveGame = ({ provider, contract }) => {
                   <td>{contract.address}</td>
                 </tr>
                 <tr>
-                  <th>Player Address</th>
+                  <th>Player 2 Address</th>
                   <td>{j2}</td>
+                </tr>
+                <tr>
+                  <th>Stake</th>
+                  <td>{stake} wei</td>
                 </tr>
               </tbody>
             </table>
+            <div className="divider"></div>
+            <div className="my-4 flex flex-col justify-center items-center text-gray-500">
+              <p className="text-lg my-2">Next steps:</p>
+              <p>1. Login from Player 2 Account</p>
+              <p>2. Join Game</p>
+              <p>3. Enter Game Address</p>
+            </div>
           </div>
         </div>
       ) : (
@@ -181,7 +200,11 @@ const SolveGame = ({ provider, contract }) => {
                 <input
                   type="text"
                   value={pwd}
-                  onChange={(e) => setpwd(e.target.value)}
+                  onChange={(e) => {
+                    if (sanitizeInput(e.target.value)) {
+                      setpwd(e.target.value);
+                    }
+                  }}
                   className="grow"
                   placeholder="Password"
                 />

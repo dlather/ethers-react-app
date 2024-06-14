@@ -6,6 +6,7 @@ import {
   moves,
   deriveKey,
   encryptSalt,
+  sanitizeInput,
   //   HashContractAddress,
 } from "./utils";
 
@@ -145,7 +146,11 @@ const CreateGame = ({ provider, setContract }) => {
           <input
             type="number"
             value={wei}
-            onChange={(e) => setwei(e.target.value)}
+            onChange={(e) => {
+              if (sanitizeInput(e.target.value)) {
+                setwei(e.target.value);
+              }
+            }}
             className="grow"
             placeholder="Enter Amount"
           />
@@ -157,7 +162,11 @@ const CreateGame = ({ provider, setContract }) => {
           <input
             type="text"
             value={p2Address}
-            onChange={(e) => setp2Address(e.target.value)}
+            onChange={(e) => {
+              if (sanitizeInput(e.target.value)) {
+                setp2Address(e.target.value);
+              }
+            }}
             className="grow"
             placeholder="Player 2 Address"
           />
@@ -178,7 +187,11 @@ const CreateGame = ({ provider, setContract }) => {
           <input
             type="text"
             value={pwd}
-            onChange={(e) => setpwd(e.target.value)}
+            onChange={(e) => {
+              if (sanitizeInput(e.target.value)) {
+                setpwd(e.target.value);
+              }
+            }}
             className="grow"
             placeholder="Password"
           />
