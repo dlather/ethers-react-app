@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { RPSAbi } from "./contractAbi";
 import { moves, sanitizeInput } from "./utils";
 import Timer from "./components/timer";
+import secureLocalStorage from "react-secure-storage";
 
 const JoinGame = ({ provider }) => {
   const [gameAddress, setgameAddress] = useState("");
@@ -92,7 +93,7 @@ const JoinGame = ({ provider }) => {
       const txn = await contractWithSigner.j1Timeout();
       settxn(txn);
       await txn.wait();
-      localStorage.clear();
+      secureLocalStorage.clear();
       window.location.reload();
     } catch (err) {
       console.error("Error p1TimeOut", err);

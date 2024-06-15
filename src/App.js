@@ -4,6 +4,7 @@ import CreateGame from "./create-game";
 import SolveGame from "./solve";
 import JoinGame from "./join-game";
 import { RPSAbi } from "./contractAbi";
+import secureLocalStorage from "react-secure-storage";
 
 function App() {
   const [provider, setProvider] = useState(null);
@@ -29,8 +30,8 @@ function App() {
 
   useEffect(() => {
     const readLocalStorage = async () => {
-      const rpsAddress = localStorage.getItem("RPSAddress");
-      const p1Address = localStorage.getItem("p1Address");
+      const rpsAddress = secureLocalStorage.getItem("RPSAddress");
+      const p1Address = secureLocalStorage.getItem("p1Address");
       if (
         rpsAddress &&
         ethers.utils.isAddress(rpsAddress) &&

@@ -9,6 +9,7 @@ import {
   sanitizeInput,
   //   HashContractAddress,
 } from "./utils";
+import secureLocalStorage from "react-secure-storage";
 
 const CreateGame = ({ provider, setContract }) => {
   const [selectedMove, setselectedMove] = useState(null);
@@ -78,21 +79,21 @@ const CreateGame = ({ provider, setContract }) => {
         settxn(txn);
         await contract.deployTransaction.wait();
         //   await deployedContract.deployed();
-        localStorage.setItem("signature", signature);
-        localStorage.setItem(
+        secureLocalStorage.setItem("signature", signature);
+        secureLocalStorage.setItem(
           "encryptedSalt",
           JSON.stringify({
             iv: Array.from(iv),
             data: Array.from(encryptedSalt),
           })
         );
-        localStorage.setItem(
+        secureLocalStorage.setItem(
           "saltForKDF",
           JSON.stringify(Array.from(saltForKDF))
         );
-        localStorage.setItem("RPSAddress", contract.address);
-        localStorage.setItem("p1Address", p1Address);
-        localStorage.setItem("p2Address", p2Address);
+        secureLocalStorage.setItem("RPSAddress", contract.address);
+        secureLocalStorage.setItem("p1Address", p1Address);
+        secureLocalStorage.setItem("p2Address", p2Address);
         setContract(contract);
         resetData();
       } catch (err) {

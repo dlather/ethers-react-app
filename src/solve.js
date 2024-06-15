@@ -8,6 +8,7 @@ import {
   HashContractAddress,
   sanitizeInput,
 } from "./utils";
+import secureLocalStorage from "react-secure-storage";
 
 const SolveGame = ({ provider, contract }) => {
   const [c2Move, setc2Move] = useState(null);
@@ -55,7 +56,7 @@ const SolveGame = ({ provider, contract }) => {
       const txn = await contractWithSigner.j2Timeout();
       settxn(txn);
       await txn.wait();
-      localStorage.clear();
+      secureLocalStorage.clear();
       window.location.reload();
     } catch (err) {
       console.error("Error p1TimeOut", err);
@@ -71,13 +72,13 @@ const SolveGame = ({ provider, contract }) => {
       const p1Address = await providersigner.getAddress();
 
       const encryptedSaltData = JSON.parse(
-        localStorage.getItem("encryptedSalt")
+        secureLocalStorage.getItem("encryptedSalt")
       );
       const encryptedSalt = new Uint8Array(encryptedSaltData.data);
       const iv = new Uint8Array(encryptedSaltData.iv);
-      const signature = localStorage.getItem("signature");
+      const signature = secureLocalStorage.getItem("signature");
       const saltForKDF = new Uint8Array(
-        JSON.parse(localStorage.getItem("saltForKDF"))
+        JSON.parse(secureLocalStorage.getItem("saltForKDF"))
       );
       const key = await deriveKey(pwd, saltForKDF);
       const decryptedSalt = await decryptSalt(encryptedSalt, key, iv);
@@ -113,7 +114,7 @@ const SolveGame = ({ provider, contract }) => {
         });
         settxn(txn);
         await txn.wait();
-        localStorage.clear();
+        secureLocalStorage.clear();
         window.location.reload();
       }
     } catch (err) {
